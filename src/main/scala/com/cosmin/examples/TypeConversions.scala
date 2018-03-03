@@ -13,7 +13,6 @@ object TypeConversions {
     val pipeline = Pipeline[Int, Int]() | (nr => Math.sqrt(nr)) | (sqrt => s"Sqrt: $sqrt!")
     val random = new Random()
     val input = Math.abs(random.nextInt())
-    val out = pipeline.execute(input)
-    println(s"input: $input --> $out")
+//    pipeline.execute(input) (out => println(s"input: $input --> $out"))
   }
 }

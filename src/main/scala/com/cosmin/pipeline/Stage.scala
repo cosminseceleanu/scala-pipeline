@@ -5,6 +5,8 @@ trait Stage {
   type Out
 
   val filter: Filter[In, Out]
+
+  def execute(in: In): Out = filter.execute(in)
 }
 
 object Stage {
