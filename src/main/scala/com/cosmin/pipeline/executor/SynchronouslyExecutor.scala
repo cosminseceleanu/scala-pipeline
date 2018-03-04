@@ -2,11 +2,10 @@ package com.cosmin.pipeline.executor
 
 import com.cosmin.pipeline.Stage
 
-import scala.concurrent.Future
+import scala.util.Try
 
 class SynchronouslyExecutor[In, Out] extends PipelineExecutor[In, Out] {
-
-  override def execute(in: In, stages: List[Stage]): Future[Out] = {
+  override def execute(in: In, stages: List[Stage])(onComplete: Try[Out] => Unit): Unit = {
     //@ToDo - rewrite this
     var out: Any = null
     var input: Any = in
@@ -15,7 +14,7 @@ class SynchronouslyExecutor[In, Out] extends PipelineExecutor[In, Out] {
       input = out
     })
 
-    Future.successful[Out](out.asInstanceOf[Out])
+    onComplete(Try[Out](out.asInstanceOf[Out]))
   }
 }
 

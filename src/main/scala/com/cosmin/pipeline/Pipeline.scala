@@ -2,10 +2,11 @@ package com.cosmin.pipeline
 
 import com.cosmin.pipeline.executor.{PipelineExecutor, SynchronouslyExecutor}
 
-import scala.concurrent.Future
+import scala.util.Try
 
 trait Pipeline[In, Out] {
   val stages: List[Stage]
+
   def | [X](f: Out => X): Pipeline[In, X] = pipe(f)
 
   def pipe[X](f: Out => X): Pipeline[In, X] = {
@@ -18,8 +19,8 @@ trait Pipeline[In, Out] {
     Pipeline[In, X](Stage[Out, X](filter) :: stages)
   }
 
-  def execute(in: In) (implicit pipelineExecutor: PipelineExecutor[In, Out] = SynchronouslyExecutor()): Future[Out] = {
-    pipelineExecutor.execute(in, stages)
+  def execute(in: In)(onComplete: Try[Out] => Unit)(implicit pipelineExecutor: PipelineExecutor[In, Out] = SynchronouslyExecutor()): Unit = {
+    pipelineExecutor.execute(in, stages) (onComplete)
   }
 }
 
