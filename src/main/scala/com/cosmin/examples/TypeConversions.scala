@@ -1,8 +1,8 @@
 package com.cosmin.examples
 
-import com.cosmin.pipeline.Pipeline
+import com.cosmin.pipeline.{Filter, Pipeline}
 
-import scala.util.{Random, Success}
+import scala.util.Success
 
 /**
   * Pipeline who receive a random int --> calculate sqrt --> create a message with sqrt result
@@ -10,12 +10,14 @@ import scala.util.{Random, Success}
   */
 object TypeConversions {
   def main(args: Array[String]): Unit = {
-    val pipeline = Pipeline[Int, Int]() | (nr => Math.sqrt(nr)) | (sqrt => s"Sqrt: $sqrt!")
-    val random = new Random()
-    val input = Math.abs(random.nextInt())
+    val pipeline = Pipeline[Int, Int]() | new Sqrt | (sqrt => s"Sqrt: $sqrt!")
 
-    pipeline.execute(input) {
-      case Success(out) => println(s"input: $input --> $out")
+    pipeline.execute(4) {
+      case Success(output) => println(output)
     }
   }
+}
+
+class Sqrt extends Filter[Int, Double] {
+  override def execute: Int => Double = input => Math.sqrt(input)
 }
