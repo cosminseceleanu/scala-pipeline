@@ -10,13 +10,17 @@ trait Pipeline[In, Out] {
   def | [X](f: Out => X): Pipeline[In, X] = pipe(f)
 
   def pipe[X](f: Out => X): Pipeline[In, X] = {
-    Pipeline[In, X](Stage[Out, X](Filter[Out, X](f)) :: stages)
+    val stage = Stage[Out, X](Filter[Out, X](f))
+
+    Pipeline[In, X]( stage :: stages reverse)
   }
 
   def | [X](filter: Filter[Out, X]): Pipeline[In, X] = pipe(filter)
 
   def pipe[X](filter: Filter[Out, X]): Pipeline[In, X] = {
-    Pipeline[In, X](Stage[Out, X](filter) :: stages)
+    val stage = Stage[Out, X](filter)
+    
+    Pipeline[In, X](stage :: stages reverse)
   }
 
   def execute(in: In)(onComplete: Try[Out] => Unit)(implicit pipelineExecutor: PipelineExecutor[In, Out] = SynchronouslyExecutor()): Unit = {
