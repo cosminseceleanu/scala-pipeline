@@ -1,7 +1,5 @@
 package com.cosmin.examples
 
-import java.util.concurrent.TimeUnit
-
 import com.cosmin.pipeline.Pipeline
 import com.cosmin.pipeline.executor.AsyncExecutor
 
