@@ -2,16 +2,17 @@ package com.cosmin.pipeline.executor.actor
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import com.cosmin.pipeline.Stage
-import com.cosmin.pipeline.executor.actor.Supervisor.{StageCompleted, Start}
+import com.cosmin.pipeline.executor.actor.Supervisor.{StageCompleted, StageFailed, Start}
 import com.cosmin.pipeline.executor.actor.Worker.Execute
 
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 object Supervisor {
   def props[Out](stages: List[Stage], onComplete: Try[Out] => Unit): Props = Props(new Supervisor(stages, onComplete))
 
   final case class Start[In](in: In)
   final case class StageCompleted[Out](stage: Stage, result: Out)
+  final case class StageFailed(stage: Stage, e: Throwable)
 }
 
 class Supervisor[Out](stages: List[Stage], onComplete: Try[Out] => Unit) extends Actor with ActorLogging {
@@ -22,13 +23,19 @@ class Supervisor[Out](stages: List[Stage], onComplete: Try[Out] => Unit) extends
 
   override def receive: Receive = {
     case Start(in) => executeStage(in)
-    case StageCompleted(stage, result) =>
-      if (remainingStages.isEmpty) {
+    case StageCompleted(stage, result) => onStageCompleted(result)
+    case StageFailed(stage, e) =>
+      onComplete(Failure(e))
+      context.stop(self)
+  }
+
+  private def onStageCompleted(result: Any): Unit = {
+    remainingStages match {
+      case Nil =>
         onComplete(Try(result.asInstanceOf[Out]))
         context.stop(self)
-      } else {
-        executeStage(result)
-      }
+      case _ => executeStage(result)
+    }
   }
 
   private def executeStage(in: Any): Unit = {

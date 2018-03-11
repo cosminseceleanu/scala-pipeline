@@ -8,7 +8,7 @@ import scala.util.Try
 
 class AkkaExecutor[In, Out](system: ActorSystem) extends PipelineExecutor[In, Out] {
   override def execute(in: In, stages: List[Stage])(onComplete: Try[Out] => Unit): Unit = {
-    val supervisor = system.actorOf(Supervisor.props[Out](stages, onComplete), "pipeline-supervisor")
+    val supervisor = system.actorOf(Supervisor.props[Out](stages, onComplete))
 
     supervisor ! Start[In](in)
   }

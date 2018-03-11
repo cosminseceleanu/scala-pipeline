@@ -6,9 +6,9 @@ import scala.util.Try
 
 class SynchronouslyExecutor[In, Out] extends PipelineExecutor[In, Out] {
   override def execute(in: In, stages: List[Stage])(onComplete: Try[Out] => Unit): Unit = {
-    val result: Out = doExecute[In, Out](stages, in)
+    val result: Try[Out] = Try[Out](doExecute[In, Out](stages, in))
 
-    onComplete(Try[Out](result))
+    onComplete(result)
   }
 
   def doExecute[I, O](stages: List[Stage], input: I): O = stages match {
