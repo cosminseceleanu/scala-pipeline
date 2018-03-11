@@ -92,3 +92,8 @@ val pipeline = Pipeline[String, String]() | Cat() | Grep("hello") | Count()
 ```
 Code above print to console 'word 'hello' was found on 3 lines' for the file https://github.com/cosminseceleanu/scala-pipeline/blob/master/myText.txt
 
+## ToDo
+* async examples
+* executor using akka actors
+* tests
+
