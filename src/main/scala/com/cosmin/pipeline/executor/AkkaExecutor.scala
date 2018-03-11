@@ -6,9 +6,8 @@ import com.cosmin.pipeline.executor.actor.Supervisor.Start
 
 import scala.util.Try
 
-class AkkaExecutor[In, Out] extends PipelineExecutor[In, Out] {
+class AkkaExecutor[In, Out](system: ActorSystem) extends PipelineExecutor[In, Out] {
   override def execute(in: In, stages: List[Stage])(onComplete: Try[Out] => Unit): Unit = {
-    val system = ActorSystem("pipeline")
     val supervisor = system.actorOf(Supervisor.props[Out](stages, onComplete), "pipeline-supervisor")
 
     supervisor ! Start[In](in)
@@ -16,5 +15,5 @@ class AkkaExecutor[In, Out] extends PipelineExecutor[In, Out] {
 }
 
 object AkkaExecutor {
-  def apply[In, Out]: AkkaExecutor[In, Out] = new AkkaExecutor[In, Out]
+  def apply[In, Out]: AkkaExecutor[In, Out] = new AkkaExecutor[In, Out](ActorSystem("pipeline"))
 }
