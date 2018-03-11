@@ -1,7 +1,7 @@
 package com.cosmin.examples.wordcount
 
 import com.cosmin.pipeline.Pipeline
-import com.cosmin.pipeline.executor.AsyncExecutor
+import com.cosmin.pipeline.executor.{AkkaExecutor, AsyncExecutor}
 
 import scala.util.Success
 
@@ -18,6 +18,7 @@ object WordCount {
     }
 
     executeAsync(pipeline, wordToFind)
+    executeAsyncUsingAkka(pipeline, wordToFind)
   }
 
   private def executeAsync(pipeline: Pipeline[String, Int], wordToFind: String): Unit = {
@@ -26,5 +27,12 @@ object WordCount {
       case Success(output) => println(s"Async ---> word '$wordToFind' was found on $output lines")
     }
     Thread.sleep(2000)
+  }
+
+  private def executeAsyncUsingAkka(pipeline: Pipeline[String, Int], wordToFind: String): Unit = {
+    implicit val akkaExecutor: AkkaExecutor[String, Int] = AkkaExecutor[String, Int]
+    pipeline.execute("myText.txt") {
+      case Success(output) => println(s"Akka Async ---> word '$wordToFind' was found on $output lines")
+    }
   }
 }
